@@ -1,0 +1,42 @@
+version: '3.7'
+services:
+  postgres_1:
+    image: postgres:latest
+    container_name: postgres_1
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=wolfgresdb
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata_1:/var/lib/postgresql/data
+
+  postgres_2:
+    image: postgres:latest
+    container_name: postgres_2
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=wolfgresdb
+    ports:
+      - "5435:5432"
+    volumes:
+      - pgdata_2:/var/lib/postgresql/data
+
+  postgres_3:
+    image: postgres:latest
+    container_name: postgres_3
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=wolfgresdb
+    ports:
+      - "5436:5432"
+    volumes:
+      - pgdata_3:/var/lib/postgresql/data
+
+volumes:
+  pgdata_1:
+  pgdata_2:
+  pgdata_3:
