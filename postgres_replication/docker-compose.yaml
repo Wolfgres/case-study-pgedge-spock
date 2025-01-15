@@ -1,11 +1,11 @@
 version: '3.8'
 x-postgres-common:
   &postgres-common
-  image: postgres:14-alpine
+  image: postgres:16-alpine
   user: postgres
   restart: always
   healthcheck:
-    test: 'pg_isready -U user --dbname=postgres'
+    test: 'pg_isready -U postgres --dbname=postgres'
     interval: 10s
     timeout: 5s
     retries: 5
@@ -16,7 +16,7 @@ services:
     ports:
       - 5455:5432
     environment:
-      POSTGRES_USER: user
+      POSTGRES_USER: postgres
       POSTGRES_DB: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_HOST_AUTH_METHOD: "scram-sha-256\nhost replication all 0.0.0.0/0 md5"
