@@ -19,9 +19,7 @@ func ValidateAccountId(pool *pgxpool.Pool) {
 }
 
 func CreateAccountObject(pool *pgxpool.Pool) {
-	accountId := GenerateAccountID()
 	account := models.Account{
-		AccountID:     accountId,
 		CustomerID:    1,
 		AccountTypeID: 1,
 		Balace:        1000.0,

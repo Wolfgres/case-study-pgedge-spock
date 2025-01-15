@@ -11,9 +11,6 @@ import (
 )
 
 func StressTest(pool *pgxpool.Pool) {
-	ValidateTransactionId(pool)
-	ValidateAccountId(pool)
-
 	var wg sync.WaitGroup
 	numTransactions, _ := parseAnyToInt(viper.Get("test.transactions")) // Número de transacciones
 	// Si max_connections = 100 en postgresql, evita que maxConcurrent supere ese número.

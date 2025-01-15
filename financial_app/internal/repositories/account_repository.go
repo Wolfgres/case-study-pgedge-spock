@@ -10,7 +10,7 @@ import (
 
 func InsertAccountObject(pool *pgxpool.Pool, mAccount models.Account) {
 	ctx := context.Background()
-	query := "INSERT INTO wfg.account (account_id, customer_id, account_type_id, balace) VALUES ($1, $2, $3, $4)"
+	query := "INSERT INTO wfg.account (customer_id, account_type_id, balace) VALUES ($1, $2, $3)"
 	// Iniciar la transacción
 	tx := BeginTransaction(pool)
 
@@ -18,7 +18,6 @@ func InsertAccountObject(pool *pgxpool.Pool, mAccount models.Account) {
 	_, err := tx.Exec(
 		ctx,
 		query,
-		mAccount.AccountID,
 		mAccount.CustomerID,
 		mAccount.AccountTypeID,
 		mAccount.Balace,

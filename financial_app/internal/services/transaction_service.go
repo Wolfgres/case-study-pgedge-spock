@@ -20,14 +20,12 @@ func ValidateTransactionId(pool *pgxpool.Pool) {
 }
 
 func CreateTransactionObject(pool *pgxpool.Pool) {
-	transactionId := GenerateTransactionID()
 	now := time.Now().UTC()
 	transaction := models.Transaction{
-		TransactionID: transactionId,
-		AccountID:     1,
-		OperationID:   1,
-		Mount:         1000.0,
-		Date:          now,
+		AccountID:   1,
+		OperationID: 1,
+		Mount:       1000.0,
+		Date:        now,
 	}
 	repositories.InsertTransactionObject(pool, transaction)
 }

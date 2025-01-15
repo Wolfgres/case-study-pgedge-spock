@@ -18,7 +18,7 @@ func GetLastTransactionIDObject(pool *pgxpool.Pool) int {
 
 func InsertTransactionObject(pool *pgxpool.Pool, mTransaction models.Transaction) {
 	ctx := context.Background()
-	query := "INSERT INTO wfg.transaction (transaction_id, account_id, operation_id, mount, date) VALUES ($1, $2, $3, $4, $5)"
+	query := "INSERT INTO wfg.transaction (account_id, operation_id, mount, date) VALUES ($1, $2, $3, $4)"
 	// Iniciar la transacción
 	tx := BeginTransaction(pool)
 
@@ -26,7 +26,6 @@ func InsertTransactionObject(pool *pgxpool.Pool, mTransaction models.Transaction
 	_, err := tx.Exec(
 		ctx,
 		query,
-		mTransaction.TransactionID,
 		mTransaction.AccountID,
 		mTransaction.OperationID,
 		mTransaction.Mount,

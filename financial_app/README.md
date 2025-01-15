@@ -28,11 +28,11 @@ Para ejecutar la aplicación debemos seguir los siguientes pasos:
 2. Compilar la aplicación con el comando siguiente:
 
 ```
-go build -o bin/wfg_finalcial_app
+go build -o ./bin/wfg_financial_app
 
 ```
 3. Ejecutar la aplicación con el siguiente comando:
 ```
-./bin/wfg_finalcial_app start
+./bin/wfg_financial_app start
 ```
 

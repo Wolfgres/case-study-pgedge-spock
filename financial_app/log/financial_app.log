@@ -1,8 +1,0 @@
-[2025-01-14 14:07:05]  INFO ************************************************
-[2025-01-14 14:07:05]  INFO *** Financial App by Wolfgres - Postgres Enterprise ****
-[2025-01-14 14:07:05]  INFO ************************************************
-[2025-01-14 14:07:05]  INFO 
-[2025-01-14 14:07:05]  INFO Start de Stress test Name Stress Test: wolfgres_db
-[2025-01-14 14:07:05] DEBUG Database name set: wolfgres_db
-[2025-01-14 14:07:07]  INFO Generando estrés con transacciones concurrentes...
-[2025-01-14 14:16:43]  INFO Prueba de estrés completada en 9m36.703765265s

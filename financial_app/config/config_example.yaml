@@ -1,0 +1,16 @@
+deamon:
+  pid_file: ./financial_app.pid
+log:
+  log_level: debug
+  log_file: log/financial_app.log
+  log_format: text # json -> to output in json format
+database:
+  host: localhost
+  port: 5432
+  admin_user: postgres
+  admin_pass: postgres
+  database_name: wolfgres_db
+test:
+  type: stress      # load -> only inserts or stress -> the stress test make inserts updates deletes and selects
+  transactions: 1000 # Transacciones por tabla
+  maxCurrent: 50 # Número máximo de transacciones concurrentes. Debe estar en el rango especificado de max_conections de postgresql
