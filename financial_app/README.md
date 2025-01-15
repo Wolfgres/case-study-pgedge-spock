@@ -26,7 +26,7 @@ Para ejecutar la aplicación debemos seguir los siguientes pasos:
 1. Tener previamente configurado el archivo de configuración `config.yaml` especificado anteriormente.
 2. Compilar la aplicación con el comando siguiente:
 ```
-go buil
+go build
 ```
 3. Ejecutar la aplicación con el siguiente comando:
 ```
