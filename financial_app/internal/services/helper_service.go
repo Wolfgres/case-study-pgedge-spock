@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -53,16 +52,6 @@ func GetExecPath() string {
 	}
 
 	return s
-}
-
-func parseStringToInt(str string) int {
-	num, err := strconv.Atoi(str) // Convierte string a int
-	if err != nil {
-		logrus.Fatalf("Error:", err)
-	} else {
-		logrus.Fatalf("Número convertido:", num)
-	}
-	return num
 }
 
 func parseAnyToInt(value any) (int, error) {

@@ -27,8 +27,8 @@ func StressTest(pool *pgxpool.Pool) {
 
 		go func() {
 			defer wg.Done()
-			CreateTransactionObject(pool)
 			CreateAccountObject(pool)
+			CreateTransactionObject(pool)
 			<-semaphore
 		}()
 	}
