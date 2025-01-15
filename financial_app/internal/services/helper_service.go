@@ -1,21 +1,17 @@
 package services
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/sirupsen/logrus"
 )
 
 const (
 	PathSeparator = string(os.PathSeparator)
-)
-
-var (
-	idCounter int        // Contador global de IDs
-	idMutex   sync.Mutex // Mutex global para proteger el contador
 )
 
 // Get log.Level from string from config file
@@ -59,10 +55,19 @@ func GetExecPath() string {
 	return s
 }
 
-// Genera un ID único de manera segura
-func GenerateID() int {
-	idMutex.Lock()         // Bloquea el Mutex para evitar accesos concurrentes
-	defer idMutex.Unlock() // Asegura que el Mutex se libere después de la función
-	idCounter++            // Incrementa el contador global
-	return idCounter       // Retorna el nuevo ID
+func parseStringToInt(str string) int {
+	num, err := strconv.Atoi(str) // Convierte string a int
+	if err != nil {
+		logrus.Fatalf("Error:", err)
+	} else {
+		logrus.Fatalf("Número convertido:", num)
+	}
+	return num
+}
+
+func parseAnyToInt(value any) (int, error) {
+	if intValue, ok := value.(int); ok {
+		return intValue, nil
+	}
+	return 0, fmt.Errorf("no se puede convertir %v a int", value)
 }

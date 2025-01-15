@@ -3,15 +3,21 @@ package services
 import (
 	"financial_app/internal/database"
 	"sync"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 func StressTest(pool *pgxpool.Pool) {
+	ValidateTransactionId(pool)
+	ValidateAccountId(pool)
+
 	var wg sync.WaitGroup
-	numTransactions := 100 // Número de transacciones
-	maxConcurrent := 50    // Número máximo de transacciones concurrentes
+	numTransactions, _ := parseAnyToInt(viper.Get("test.transactions")) // Número de transacciones
+	// Si max_connections = 100 en postgresql, evita que maxConcurrent supere ese número.
+	maxConcurrent, _ := parseAnyToInt(viper.Get("test.maxCurrent")) // Número máximo de transacciones concurrentes
 	// Control de concurrencia con un canal
 	semaphore := make(chan struct{}, maxConcurrent)
 
@@ -22,7 +28,7 @@ func StressTest(pool *pgxpool.Pool) {
 		go func() {
 			defer wg.Done()
 			CreateTransactionObject(pool)
-			//CreateAccountObject(pool)
+			CreateAccountObject(pool)
 			<-semaphore
 		}()
 	}
@@ -37,9 +43,9 @@ func GenerateStressTest() {
 		logrus.Fatal("No se pudo conectar a la base de datos:", err)
 	}
 	defer pool.Close() // Asegura que el pool se cierre correctamente
-	ValidateTransactionId(pool)
-	//ValidateAccountId(pool)
 	logrus.Info("Generando estrés con transacciones concurrentes...")
+	start := time.Now()
 	StressTest(pool)
-	logrus.Info("Prueba de estrés completada.")
+	elapsed := time.Since(start)
+	logrus.Infof("Prueba de estrés completada en %v", elapsed)
 }

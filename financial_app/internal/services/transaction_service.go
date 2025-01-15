@@ -3,18 +3,24 @@ package services
 import (
 	"financial_app/internal/models"
 	"financial_app/internal/repositories"
+	"sync"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+var (
+	idCounterTransaction int        // Contador global de IDs
+	idMutexTransaction   sync.Mutex // Mutex global para proteger el contador
+)
+
 func ValidateTransactionId(pool *pgxpool.Pool) {
-	Id := repositories.GetLastTransactionID(pool)
-	idCounter = Id
+	Id := repositories.GetLastTransactionIDObject(pool)
+	idCounterTransaction = Id
 }
 
 func CreateTransactionObject(pool *pgxpool.Pool) {
-	transactionId := GenerateID()
+	transactionId := GenerateTransactionID()
 	now := time.Now().UTC()
 	transaction := models.Transaction{
 		TransactionID: transactionId,
@@ -23,5 +29,13 @@ func CreateTransactionObject(pool *pgxpool.Pool) {
 		Mount:         1000.0,
 		Date:          now,
 	}
-	repositories.InsertTransactionTransactionBody(pool, transaction)
+	repositories.InsertTransactionObject(pool, transaction)
+}
+
+// Genera un ID único de manera segura
+func GenerateTransactionID() int {
+	idMutexTransaction.Lock()         // Bloquea el Mutex para evitar accesos concurrentes
+	defer idMutexTransaction.Unlock() // Asegura que el Mutex se libere después de la función
+	idCounterTransaction++            // Incrementa el contador global
+	return idCounterTransaction       // Retorna el nuevo ID
 }

@@ -8,44 +8,21 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func GetInsertTransactionQuery() string {
-	return "INSERT INTO wfg.transaction (transaction_id, account_id, operation_id, mount, date) VALUES ($1, $2, $3, $4, $5)"
-}
-
-func InsertTransaction(pool *pgxpool.Pool, mTransaction models.Transaction) {
-	_, err := pool.Exec(
-		context.Background(),
-		GetInsertTransactionQuery(),
-		mTransaction.TransactionID,
-		mTransaction.AccountID,
-		mTransaction.OperationID,
-		mTransaction.Mount,
-		mTransaction.Date,
-	)
-	if err != nil {
-		logrus.Fatalf("Error al intentar insertar datos: %v", err)
-	}
-}
-
-func GetLastTransactionID(pool *pgxpool.Pool) int {
+func GetLastTransactionIDObject(pool *pgxpool.Pool) int {
 	query := "SELECT COALESCE(MAX(transaction_id), 0) FROM wfg.transaction"
 	return GetLastID(pool, query)
 }
 
-func InsertTransactionTransactionBody(pool *pgxpool.Pool, mTransaction models.Transaction) int {
+func InsertTransactionObject(pool *pgxpool.Pool, mTransaction models.Transaction) {
 	ctx := context.Background()
-
+	query := "INSERT INTO wfg.transaction (transaction_id, account_id, operation_id, mount, date) VALUES ($1, $2, $3, $4, $5)"
 	// Iniciar la transacción
-	tx, err := pool.Begin(ctx)
-	if err != nil {
-		logrus.Printf("Error al comenzar transacción: %v", err)
-		return 0
-	}
+	tx := BeginTransaction(pool)
 
 	// Ejecutar operación de escritura dentro de la transacción
-	_, err = tx.Exec(
+	_, err := tx.Exec(
 		ctx,
-		GetInsertTransactionQuery(),
+		query,
 		mTransaction.TransactionID,
 		mTransaction.AccountID,
 		mTransaction.OperationID,
@@ -53,16 +30,44 @@ func InsertTransactionTransactionBody(pool *pgxpool.Pool, mTransaction models.Tr
 		mTransaction.Date,
 	)
 	if err != nil {
-		logrus.Printf("Error al ejecutar operación en transacción: %v", err)
+		logrus.Fatalf("Error al ejecutar operación en transacción: %v", err)
 		tx.Rollback(ctx)
-		return 0
+		return
+	}
+	CommitTransaction(tx)
+}
+
+func GetTransactionObjects(pool *pgxpool.Pool) ([]models.Transaction, error) {
+	query := "SELECT * FROM wfg.transaction AS t ORDER BY t.transaction_id ASC LIMIT 20"
+	// Ejecutar la consulta
+	rows, err := pool.Query(context.Background(), query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Lista para almacenar los resultados
+	var transactions []models.Transaction
+
+	// Iterar sobre los resultados
+	for rows.Next() {
+		var transaction models.Transaction
+		err := rows.Scan(
+			&transaction.TransactionID,
+			&transaction.AccountID,
+			&transaction.OperationID,
+			&transaction.Mount,
+			&transaction.Date)
+		if err != nil {
+			return nil, err
+		}
+		transactions = append(transactions, transaction)
 	}
 
-	// Confirmar la transacción
-	if err := tx.Commit(ctx); err != nil {
-		logrus.Printf("Error al hacer commit de la transacción: %v", err)
-		return 0
+	// Verificar errores de iteración
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
-	return mTransaction.TransactionID
+	return transactions, nil
 }
