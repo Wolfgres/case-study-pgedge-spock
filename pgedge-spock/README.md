@@ -18,4 +18,6 @@ $ source .venv/bin/active
 
 ## Run Docker Swarm example
 
-After the install now we execute some commands before to init test.
+After the install now we execute some commands before to init test. 
+
+For we create a directories to 
