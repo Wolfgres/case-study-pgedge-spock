@@ -4,8 +4,9 @@ Esta aplicación nos permitirá realizar una prueba de estrés a una base de dat
 
 ## Configuración
 
-Antes de comenzar se deberá modificar los parametros de configuración del proyecto el cual se encuentra en el archivo `financial_app/config/config.yaml`.
-Para la configuración de `test`se deberá especificar el numero de transacciones y el maximo de transacciones concurrentes. El parametro al que debemos prestar más atención es a `maxCurrent`, ya que este debera estar en el rango especificado por el parametro de configuración `max_connections` de postgresql.
+1. Antes de comenzar se deberá crear el archivo de configuración `config.yaml` en el directorio `financial_app/config/`.
+2. Copiar el contenido del archivo `config_example.yaml` al nuevo archivo `config.yaml`.
+3. Realizado los pasos anteriores, para la configuración de los parametros, en la sección de `test`se deberá especificar el numero de transacciones y el maximo de transacciones concurrentes. El parametro al que debemos prestar más atención es a `maxCurrent`, ya que este debera estar en el rango especificado por el parametro de configuración `max_connections` de postgresql.
 
 ```
 database:
