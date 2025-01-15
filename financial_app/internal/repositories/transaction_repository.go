@@ -8,6 +8,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+/*
+TODO: don't use this method to create PK, instead that use sequence
+*/
 func GetLastTransactionIDObject(pool *pgxpool.Pool) int {
 	query := "SELECT COALESCE(MAX(transaction_id), 0) FROM wfg.transaction"
 	return GetLastID(pool, query)

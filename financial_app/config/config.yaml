@@ -5,8 +5,8 @@ log:
   log_file: log/financial_app.log
   log_format: text # json -> to output in json format
 database:
-  host: 192.168.0.140
-  port: 5432
+  host: localhost
+  port: 5455
   admin_user: wolfgres_user
   admin_pass: password
   database_name: wolfgres_db

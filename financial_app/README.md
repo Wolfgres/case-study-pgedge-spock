@@ -1,4 +1,4 @@
-# Stress Test
+# Wolfgres Finalcial App (Demo)
 
 Esta aplicación nos permitirá realizar una prueba de estrés a una base de datos postgresql, que nos permitirá especificar el numero de transacciones por tabla.
 
@@ -23,13 +23,16 @@ test:
 ## Ejecución
 
 Para ejecutar la aplicación debemos seguir los siguientes pasos:
+
 1. Tener previamente configurado el archivo de configuración `config.yaml` especificado anteriormente.
 2. Compilar la aplicación con el comando siguiente:
+
 ```
-go build
+go build -o bin/wfg_finalcial_app
+
 ```
 3. Ejecutar la aplicación con el siguiente comando:
 ```
-./financial_app start
+./bin/wfg_finalcial_app start
 ```
 
