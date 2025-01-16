@@ -8,15 +8,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func InsertAccountObject(pool *pgxpool.Pool, mAccount models.Account) {
-	ctx := context.Background()
+func InsertAccountObjectPool(pool *pgxpool.Pool, mAccount models.Account) {
 	query := "INSERT INTO wfg.account (customer_id, account_type_id, balace) VALUES ($1, $2, $3)"
-	// Iniciar la transacción
-	tx := BeginTransaction(pool)
-
 	// Ejecutar operación de escritura dentro de la transacción
-	_, err := tx.Exec(
-		ctx,
+	_, err := pool.Exec(
+		context.Background(),
 		query,
 		mAccount.CustomerID,
 		mAccount.AccountTypeID,
@@ -24,11 +20,8 @@ func InsertAccountObject(pool *pgxpool.Pool, mAccount models.Account) {
 	)
 	if err != nil {
 		logrus.Fatalf("Error al ejecutar operación en transacción: %v", err)
-		tx.Rollback(ctx)
 		return
 	}
-
-	CommitTransaction(tx)
 }
 
 func GetLastAccountIDObject(pool *pgxpool.Pool) int {
@@ -69,6 +62,11 @@ func GetAccountObjects(pool *pgxpool.Pool) ([]models.Account, error) {
 	}
 
 	return accounts, nil
+}
+
+func GetLastAccountID(pool *pgxpool.Pool) int {
+	query := "SELECT COALESCE(MAX(account_id), 0) FROM wfg.account"
+	return GetLastID(pool, query)
 }
 
 func GetAccountObject(pool *pgxpool.Pool, accountID int) (*models.Account, error) {

@@ -11,6 +11,5 @@ database:
   admin_pass: postgres
   database_name: wolfgres_db
 test:
-  type: stress      # load -> only inserts or stress -> the stress test make inserts updates deletes and selects
-  transactions: 1000 # Transacciones por tabla
-  maxCurrent: 50 # Número máximo de transacciones concurrentes. Debe estar en el rango especificado de max_conections de postgresql
+  seconds_long: 30    # Duración de la prueba
+  num_goroutines: 50  # Número de hilos (workers). Debe estar en el rango especificado de max_conections de postgresql
