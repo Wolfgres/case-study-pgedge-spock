@@ -16,7 +16,7 @@ func GetLastTransactionIDObject(pool *pgxpool.Pool) int {
 	return GetLastID(pool, query)
 }
 
-func InsertTransactionObjectPool(pool *pgxpool.Pool, mTransaction models.Transaction) error {
+func InsertTransactionObjectPool(pool *pgxpool.Pool, mTransaction models.Transaction) {
 	query := "INSERT INTO wfg.transaction (account_id, operation_id, mount, date) VALUES ($1, $2, $3, $4)"
 
 	// Ejecutar operación de escritura dentro de la transacción
@@ -29,10 +29,8 @@ func InsertTransactionObjectPool(pool *pgxpool.Pool, mTransaction models.Transac
 		mTransaction.Date,
 	)
 	if err != nil {
-		logrus.Fatalf("Error al ejecutar operación en transacción: %v", err)
-		return err
+		logrus.Fatalf("Error al ejecutar el INSERT en transacción %v", err)
 	}
-	return nil
 }
 
 func GetTransactionObjects(pool *pgxpool.Pool) ([]models.Transaction, error) {
@@ -68,4 +66,36 @@ func GetTransactionObjects(pool *pgxpool.Pool) ([]models.Transaction, error) {
 	}
 
 	return transactions, nil
+}
+
+func GetTransactionObject(pool *pgxpool.Pool, transactionID int) (*models.Transaction, error) {
+	var transaction models.Transaction
+	query := "SELECT t.transaction_id, t.account_id, t.operation_id, t.mount, t.date FROM wfg.transaction AS t WHERE t.transaction_id = $1"
+	err := pool.QueryRow(context.Background(), query, transactionID).Scan(
+		&transaction.TransactionID,
+		&transaction.AccountID,
+		&transaction.OperationID,
+		&transaction.Mount,
+		&transaction.Date,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &transaction, nil
+}
+
+func UpdateTransactionObject(pool *pgxpool.Pool, mTransaction models.Transaction) {
+	query := "UPDATE wfg.transaction SET account_id = $1, operation_id = $2, mount = $3, date = $4 WHERE transaction_id = $5"
+	_, err := pool.Exec(
+		context.Background(),
+		query,
+		mTransaction.AccountID,
+		mTransaction.OperationID,
+		mTransaction.Mount,
+		mTransaction.Date,
+		mTransaction.TransactionID,
+	)
+	if err != nil {
+		logrus.Fatalf("Error al ejecutar el UPDATE en transacción: %v", err)
+	}
 }

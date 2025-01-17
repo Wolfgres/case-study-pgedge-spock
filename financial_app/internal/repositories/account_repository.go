@@ -19,7 +19,7 @@ func InsertAccountObjectPool(pool *pgxpool.Pool, mAccount models.Account) error 
 		mAccount.Balace,
 	)
 	if err != nil {
-		logrus.Fatalf("Error al ejecutar operación en transacción: %v", err)
+		logrus.Fatalf("Error al ejecutar el INSERT en account: %v", err)
 		return err
 	}
 	return nil
@@ -72,7 +72,7 @@ func GetLastAccountID(pool *pgxpool.Pool) int {
 
 func GetAccountObject(pool *pgxpool.Pool, accountID int) (*models.Account, error) {
 	var account models.Account
-	query := "SELECT t.account_id, t.customer_id, t.account_type_id, t.balace FROM wfg.account AS t WHERE t.account_id = $1"
+	query := "SELECT a.account_id, a.customer_id, a.account_type_id, a.balace FROM wfg.account AS a WHERE a.account_id = $1"
 	err := pool.QueryRow(context.Background(), query, accountID).Scan(
 		&account.AccountID,
 		&account.CustomerID,
@@ -82,4 +82,19 @@ func GetAccountObject(pool *pgxpool.Pool, accountID int) (*models.Account, error
 		return nil, err
 	}
 	return &account, nil
+}
+
+func UpdateAccountObject(pool *pgxpool.Pool, mAccount models.Account) {
+	query := "UPDATE wfg.account SET customer_id = $1, account_type_id = $2, balace = $3 WHERE account_id = $4"
+	_, err := pool.Exec(
+		context.Background(),
+		query,
+		mAccount.CustomerID,
+		mAccount.AccountTypeID,
+		mAccount.Balace,
+		mAccount.AccountID,
+	)
+	if err != nil {
+		logrus.Fatalf("Error al ejecutar el UPDATE en account: %v", err)
+	}
 }

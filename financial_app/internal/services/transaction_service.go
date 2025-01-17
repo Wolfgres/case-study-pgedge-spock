@@ -17,7 +17,7 @@ func validateTransactionId(pool *pgxpool.Pool) {
 	idCounterTransaction = repositories.GetLastTransactionIDObject(pool)
 }
 
-func createTransactionObject(pool *pgxpool.Pool) error {
+func createTransactionObject(pool *pgxpool.Pool) {
 	now := time.Now().UTC()
 	transaction := models.Transaction{
 		AccountID:   idCounterAccount,
@@ -25,7 +25,7 @@ func createTransactionObject(pool *pgxpool.Pool) error {
 		Mount:       1000.0,
 		Date:        now,
 	}
-	return repositories.InsertTransactionObjectPool(pool, transaction)
+	repositories.InsertTransactionObjectPool(pool, transaction)
 }
 
 func getTransactionInserts(pool *pgxpool.Pool) {
