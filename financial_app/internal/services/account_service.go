@@ -14,38 +14,30 @@ var (
 	idMutexAccount   sync.Mutex
 )
 
-func ValidateAccountId(pool *pgxpool.Pool) {
+func validateAccountId(pool *pgxpool.Pool) {
 	Id := repositories.GetLastAccountIDObject(pool)
 	idCounterAccount = Id
 }
 
-func CreateAccountObject(pool *pgxpool.Pool) {
+func createAccountObject(pool *pgxpool.Pool) error {
 	account := models.Account{
 		CustomerID:    1,
 		AccountTypeID: 1,
 		Balace:        1000.0,
 	}
-	repositories.InsertAccountObjectPool(pool, account)
+	return repositories.InsertAccountObjectPool(pool, account)
 }
 
-// Genera un ID único de manera segura
-func GenerateAccountID() int {
-	idMutexAccount.Lock()         // Bloquea el Mutex para evitar accesos concurrentes
-	defer idMutexAccount.Unlock() // Asegura que el Mutex se libere después de la función
-	idCounterAccount++            // Incrementa el contador global
-	return idCounterAccount       // Retorna el nuevo ID
-}
-
-func GetAccountIdPivot(pool *pgxpool.Pool) {
-	ValidateAccountId(pool)
+func getAccountIdPivot(pool *pgxpool.Pool) {
+	validateAccountId(pool)
 	if idCounterAccount == 0 {
-		CreateAccountObject(pool)
-		ValidateAccountId(pool)
+		createAccountObject(pool)
+		validateAccountId(pool)
 	}
 	logrus.Infof("account_id pivot -> %v", idCounterAccount)
 }
 
-func GetAccountInserts(pool *pgxpool.Pool) {
+func getAccountInserts(pool *pgxpool.Pool) {
 	Id := repositories.GetLastAccountIDObject(pool)
 	result := Id - idCounterAccount
 	logrus.Infof("Numero de inserts realizados en la tabla account -> %v", result)

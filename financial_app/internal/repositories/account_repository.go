@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func InsertAccountObjectPool(pool *pgxpool.Pool, mAccount models.Account) {
+func InsertAccountObjectPool(pool *pgxpool.Pool, mAccount models.Account) error {
 	query := "INSERT INTO wfg.account (customer_id, account_type_id, balace) VALUES ($1, $2, $3)"
 	// Ejecutar operación de escritura dentro de la transacción
 	_, err := pool.Exec(
@@ -20,8 +20,9 @@ func InsertAccountObjectPool(pool *pgxpool.Pool, mAccount models.Account) {
 	)
 	if err != nil {
 		logrus.Fatalf("Error al ejecutar operación en transacción: %v", err)
-		return
+		return err
 	}
+	return nil
 }
 
 func GetLastAccountIDObject(pool *pgxpool.Pool) int {

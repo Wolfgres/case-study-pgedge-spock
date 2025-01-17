@@ -2,7 +2,7 @@ deamon:
   pid_file: ./financial_app.pid
 log:
   log_level: debug
-  log_file: log/financial_app.log
+  log_file: bin/log/financial_app.log
   log_format: text # json -> to output in json format
 database:
   host: localhost
@@ -10,6 +10,3 @@ database:
   admin_user: postgres
   admin_pass: postgres
   database_name: wolfgres_db
-test:
-  seconds_long: 30    # Duración de la prueba
-  num_goroutines: 50  # Número de hilos (workers). Debe estar en el rango especificado de max_conections de postgresql

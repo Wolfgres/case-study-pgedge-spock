@@ -4,6 +4,7 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"financial_app/internal/database"
 	"financial_app/internal/services"
 	"fmt"
 	"io"
@@ -18,21 +19,28 @@ import (
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
-var cfgFile string
+var (
+	numGoroutines    int
+	testDuration     int
+	maxConns         int
+	numTransactions  int
+	testDBConnection int
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "financial_app",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Stress Test Application",
+	Long: `
+	This database stress testing application allows you to run insert, delete, update, and query scripts.
+	
+	Some of the application's features include specifying duration seconds, transactions, goroutines (threads), 
+	and maximum client connection capacity to the database stress test.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Run: func(cmd *cobra.Command, args []string) {
+		start()
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -46,17 +54,41 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.financial_app.yaml)")
-
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/config.yaml)")
+	rootCmd.Flags().IntVarP(&numGoroutines, "goroutines", "g", 0, "Number of concurrent goroutines")
+	rootCmd.Flags().IntVarP(&testDuration, "duration", "d", 0, "Test duration in seconds")
+	rootCmd.Flags().IntVarP(&maxConns, "max-conns", "m", 0, "Maximum number of connections in the pool")
+	rootCmd.Flags().IntVarP(&numTransactions, "transactions", "t", 0, "Number of transactions")
+	rootCmd.Flags().IntVarP(&testDBConnection, "test-conn", "c", 0, "Test node databse connection")
+}
+
+func start() {
+	logrus.Info("************************************************")
+	logrus.Info("*** Financial App by Wolfgres - Postgres Enterprise ****")
+	logrus.Info("************************************************")
+	logrus.Infof("Number of Goroutines: %d", numGoroutines)
+	logrus.Infof("Test Duration: %d seconds", testDuration)
+	logrus.Infof("Max Connections in Pool: %d", maxConns)
+	logrus.Infof("Transacions per table: %d", numTransactions)
+	logrus.Info("************************************************")
+	pool := database.InitDatabasePool(maxConns, numGoroutines)
+	services.StartStressTest(pool, numGoroutines, testDuration, numTransactions)
+}
+
+func getConfigFilePath() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Current project path not found", err)
+	}
+	fmt.Println("Current project path:", dir)
+	return dir + "/config/config.yaml"
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	getConfigFilePath()
+	cfgFile := getConfigFilePath()
 	if cfgFile != "" {
 		// Use config file from the flag.
 		dir, file := path.Split(cfgFile)
@@ -125,13 +157,4 @@ func initConfig() {
 	logrus.SetLevel(logLevel)
 	//logrus.SetLevel(logrus.InfoLevel)
 	//fmt.Println(viper.Get("logrus.log_format"))
-}
-
-func getConfigFilePath() {
-	dir, err := os.Getwd()
-	if err != nil {
-		fmt.Println("Current project path not found", err)
-	}
-	fmt.Println("Current project path:", dir)
-	cfgFile = dir + "/config/config.yaml"
 }

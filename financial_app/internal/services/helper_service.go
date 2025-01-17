@@ -54,7 +54,7 @@ func GetExecPath() string {
 	return s
 }
 
-func parseAnyToInt(value any) (int, error) {
+func ParseAnyToInt(value any) (int, error) {
 	if intValue, ok := value.(int); ok {
 		return intValue, nil
 	}

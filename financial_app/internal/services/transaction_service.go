@@ -15,12 +15,11 @@ var (
 	idMutexTransaction   sync.Mutex // Mutex global para proteger el contador
 )
 
-func ValidateTransactionId(pool *pgxpool.Pool) {
-	Id := repositories.GetLastTransactionIDObject(pool)
-	idCounterTransaction = Id
+func validateTransactionId(pool *pgxpool.Pool) {
+	idCounterTransaction = repositories.GetLastTransactionIDObject(pool)
 }
 
-func CreateTransactionObject(pool *pgxpool.Pool) {
+func createTransactionObject(pool *pgxpool.Pool) error {
 	now := time.Now().UTC()
 	transaction := models.Transaction{
 		AccountID:   idCounterAccount,
@@ -28,18 +27,18 @@ func CreateTransactionObject(pool *pgxpool.Pool) {
 		Mount:       1000.0,
 		Date:        now,
 	}
-	repositories.InsertTransactionObjectPool(pool, transaction)
+	return repositories.InsertTransactionObjectPool(pool, transaction)
 }
 
 // Genera un ID único de manera segura
-func GenerateTransactionID() int {
+func generateTransactionID() int {
 	idMutexTransaction.Lock()         // Bloquea el Mutex para evitar accesos concurrentes
 	defer idMutexTransaction.Unlock() // Asegura que el Mutex se libere después de la función
 	idCounterTransaction++            // Incrementa el contador global
 	return idCounterTransaction       // Retorna el nuevo ID
 }
 
-func GetTransactionInserts(pool *pgxpool.Pool) {
+func getTransactionInserts(pool *pgxpool.Pool) {
 	Id := repositories.GetLastTransactionIDObject(pool)
 	result := Id - idCounterTransaction
 	logrus.Infof("Numero de inserts realizados en la tabla transaction -> %v", result)

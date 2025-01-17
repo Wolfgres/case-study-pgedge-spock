@@ -3,9 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
-	"os"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -14,25 +12,14 @@ import (
 func getConnectionString() string {
 	return fmt.Sprintf(
 		"postgresql://%s:%s@%s:%v/%s",
-		viper.Get("database.admin_user"),
-		viper.Get("database.admin_pass"),
-		viper.Get("database.host"),
-		viper.GetInt("database.port"),
-		viper.Get("database.database_name"))
+		viper.Get("database.node_1.admin_user"),
+		viper.Get("database.node_1.admin_pass"),
+		viper.Get("database.node_1.host"),
+		viper.GetInt("database.node_1.port"),
+		viper.Get("database.node_1.database_name"))
 }
 
-func PgxConnection() (*pgx.Conn, context.Context) {
-	var connStr string = getConnectionString()
-	contxt := context.Background()
-	conn, err := pgx.Connect(contxt, connStr)
-	if err != nil {
-		logrus.Errorf("%v Unable to connect to database: %v", os.Stderr, err)
-		os.Exit(1)
-	}
-	return conn, contxt
-}
-
-func PgxPoolConnection() (*pgxpool.Pool, error) {
+func pgxPoolConnection(maxConns int32) (*pgxpool.Pool, error) {
 	var connStr string = getConnectionString()
 	ctx := context.Background()
 	// Configurar el pool con opciones adicionales
@@ -42,7 +29,7 @@ func PgxPoolConnection() (*pgxpool.Pool, error) {
 		return nil, err
 	}
 	// Ajustar parámetros opcionales del pool (ajusta según tu carga)
-	config.MaxConns = 5        // Máximo de conexiones simultáneas
+	config.MaxConns = maxConns // Máximo de conexiones simultáneas
 	config.MinConns = 1        // Mínimo de conexiones activas
 	config.MaxConnLifetime = 0 // No cerrar conexiones automáticamente
 
@@ -54,4 +41,19 @@ func PgxPoolConnection() (*pgxpool.Pool, error) {
 	}
 
 	return pool, nil
+}
+
+func InitDatabasePool(maxConns int, numGoroutines int) *pgxpool.Pool {
+	if maxConns <= 0 {
+		logrus.Fatal("Please, enter a valid number for max-conns")
+	}
+	if maxConns < numGoroutines {
+		logrus.Fatal("max-conns must be >= goroutines")
+	}
+	maxConnsInt32 := int32(maxConns)
+	pool, err := pgxPoolConnection(maxConnsInt32)
+	if err != nil {
+		logrus.Fatal("No se pudo conectar a la base de datos:", err)
+	}
+	return pool
 }

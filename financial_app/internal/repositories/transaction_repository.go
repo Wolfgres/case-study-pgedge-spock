@@ -16,7 +16,7 @@ func GetLastTransactionIDObject(pool *pgxpool.Pool) int {
 	return GetLastID(pool, query)
 }
 
-func InsertTransactionObjectPool(pool *pgxpool.Pool, mTransaction models.Transaction) {
+func InsertTransactionObjectPool(pool *pgxpool.Pool, mTransaction models.Transaction) error {
 	query := "INSERT INTO wfg.transaction (account_id, operation_id, mount, date) VALUES ($1, $2, $3, $4)"
 
 	// Ejecutar operación de escritura dentro de la transacción
@@ -30,8 +30,9 @@ func InsertTransactionObjectPool(pool *pgxpool.Pool, mTransaction models.Transac
 	)
 	if err != nil {
 		logrus.Fatalf("Error al ejecutar operación en transacción: %v", err)
-		return
+		return err
 	}
+	return nil
 }
 
 func GetTransactionObjects(pool *pgxpool.Pool) ([]models.Transaction, error) {
