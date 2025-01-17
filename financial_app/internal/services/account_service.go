@@ -3,7 +3,6 @@ package services
 import (
 	"financial_app/internal/models"
 	"financial_app/internal/repositories"
-	"sync"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus"
@@ -11,7 +10,6 @@ import (
 
 var (
 	idCounterAccount int
-	idMutexAccount   sync.Mutex
 )
 
 func validateAccountId(pool *pgxpool.Pool) {
