@@ -13,7 +13,7 @@ database:
     host: localhost
     port: 5432
     admin_user: postgres
-    admin_pass: postgres # VB7tZ99dulum
+    admin_pass: postgres
     database_name: wolfgres_db
 ```
 
