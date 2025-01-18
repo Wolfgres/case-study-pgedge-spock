@@ -25,6 +25,7 @@ var (
 	maxConns         int
 	numTransactions  int
 	testDBConnection int
+	operation        int
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -60,8 +61,9 @@ func init() {
 	rootCmd.Flags().IntVarP(&numGoroutines, "goroutines", "g", 0, "Number of concurrent goroutines")
 	rootCmd.Flags().IntVarP(&testDuration, "duration", "d", 0, "Test duration in seconds")
 	rootCmd.Flags().IntVarP(&maxConns, "max-conns", "m", 0, "Maximum number of connections in the pool")
-	rootCmd.Flags().IntVarP(&numTransactions, "transactions", "t", 0, "Number of transactions")
+	rootCmd.Flags().IntVarP(&numTransactions, "transactions", "t", 0, "Number of transactions. Must be a number that are multiples of goroutine")
 	rootCmd.Flags().IntVarP(&testDBConnection, "test-conn", "c", 0, "Test node databse connection")
+	rootCmd.Flags().IntVarP(&operation, "operation", "o", 0, "Choose a stress test transactions: INSERT=1, SELECT=2, UPDATE=3")
 }
 
 func start() {
@@ -74,7 +76,7 @@ func start() {
 	logrus.Infof("Transacions per table: %d", numTransactions)
 	logrus.Info("************************************************")
 	pool := database.InitDatabasePool(maxConns, numGoroutines)
-	services.StartStressTest(pool, numGoroutines, testDuration, numTransactions)
+	services.StartStressTest(pool, numGoroutines, testDuration, numTransactions, operation)
 }
 
 func getConfigFilePath() string {

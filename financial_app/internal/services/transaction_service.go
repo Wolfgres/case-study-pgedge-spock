@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -28,8 +27,13 @@ func createTransactionObject(pool *pgxpool.Pool) {
 	repositories.InsertTransactionObjectPool(pool, transaction)
 }
 
-func getTransactionInserts(pool *pgxpool.Pool) {
-	Id := repositories.GetLastTransactionIDObject(pool)
-	result := Id - idCounterTransaction
-	logrus.Infof("Numero de inserts realizados en la tabla transaction -> %v", result)
+func getTransactionObjectPage(pool *pgxpool.Pool) {
+	repositories.GetTransactionObjects(pool)
+}
+
+func editTransactionOnject(pool *pgxpool.Pool) {
+	transaction, _ := repositories.GetTransactionObject(pool, idCounterTransaction)
+	transaction.Mount = 2300.0
+	transaction.Date = time.Now()
+	repositories.UpdateTransactionObject(pool, *transaction)
 }

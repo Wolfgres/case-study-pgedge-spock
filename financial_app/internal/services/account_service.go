@@ -35,8 +35,13 @@ func getAccountIdPivot(pool *pgxpool.Pool) {
 	logrus.Infof("account_id pivot -> %v", idCounterAccount)
 }
 
-func getAccountInserts(pool *pgxpool.Pool) {
-	Id := repositories.GetLastAccountIDObject(pool)
-	result := Id - idCounterAccount
-	logrus.Infof("Numero de inserts realizados en la tabla account -> %v", result)
+func editAccountObject(pool *pgxpool.Pool) {
+	account, _ := repositories.GetAccountObject(pool, idCounterAccount)
+	account.AccountTypeID = 2
+	account.Balace = 2000.0
+	repositories.UpdateAccountObject(pool, *account)
+}
+
+func getAccountObjectPage(pool *pgxpool.Pool) {
+	repositories.GetAccountObjects(pool)
 }
