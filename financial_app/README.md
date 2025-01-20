@@ -5,7 +5,7 @@ Esta aplicación nos permitirá realizar una prueba de estrés a una base de dat
 ## Configuración
 
 1. Antes de comenzar se deberá crear el archivo de configuración `config.yaml` en el directorio `financial_app/config/`.
-2. Copiar el contenido del archivo `config_example.yaml` al nuevo archivo `config.yaml` y modificar los parametros de conexión a la base de datos.
+2. Copiar el contenido del archivo `config_example.yaml` al nuevo archivo `config.yaml` y modificar los parametros de conexión de los nodos de la base de datos.
 
 ```
 database:
