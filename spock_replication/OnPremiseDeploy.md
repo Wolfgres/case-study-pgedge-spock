@@ -67,7 +67,7 @@ Now we need create a configuration to cluster. This configuration we can create 
 ```
 cd pgedge
 
-./pgedge cluster json-template wfg_cluster wolfgres_db 2 wolfgres_admin 123456 16 5432
+./pgedge cluster json-template wfg_cluster wolfgres_db 2 wolfgres_user 123456 16 5432
 
 ```
 
