@@ -4,14 +4,12 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"financial_app/internal/database"
 	"financial_app/internal/services"
 	"fmt"
 	"io"
 	"os"
 	"path"
 	"path/filepath"
-	"sync"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/sirupsen/logrus"
@@ -74,38 +72,7 @@ func start() {
 	logrus.Infof("Max Connections in Pool: %d", maxConns)
 	logrus.Infof("Transacions per table: %d", numTransactions)
 	logrus.Info("************************************************")
-	stressTestNodes()
-
-}
-
-func stressTestNodes() {
-	var wg sync.WaitGroup
-	connStrNodes := database.GetConnectionBodies()
-	numNodes := len(connStrNodes)
-	validateAverageNodes(numNodes)
-	averageTestDuration := testDuration / numNodes
-	averageNumTransaction := numTransactions / numNodes
-	for i, value := range connStrNodes {
-		connStr := database.GetConnectionString(value)
-		wg.Add(1)
-		go func(workerID int, connStr string) {
-			defer wg.Done()
-			logrus.Info("Stress test started in node -> ", workerID)
-			pool := database.InitDatabasePool(maxConns, numGoroutines, connStr)
-			services.StartStressTest(pool, numGoroutines, averageTestDuration, averageNumTransaction, operation)
-			logrus.Info("Stress test complete in node -> ", workerID)
-		}(i, connStr)
-	}
-	wg.Wait()
-}
-
-func validateAverageNodes(numNodes int) {
-	if testDuration%numNodes != 0 && testDuration > 0 {
-		logrus.Fatal("Check that the duration number is a multiple of the nodes number")
-	}
-	if numTransactions%numNodes != 0 && numTransactions > 0 {
-		logrus.Fatal("Check that the transactions number is a multiple of the nodes number")
-	}
+	services.StressTestNodes(numGoroutines, testDuration, numTransactions, operation, maxConns)
 }
 
 func getConfigFilePath() string {

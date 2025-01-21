@@ -1,7 +1,9 @@
 package services
 
 import (
+	"crypto/rand"
 	"fmt"
+	"math/big"
 	"os"
 	"path/filepath"
 	"strings"
@@ -59,4 +61,11 @@ func ParseAnyToInt(value any) (int, error) {
 		return intValue, nil
 	}
 	return 0, fmt.Errorf("no se puede convertir %v a int", value)
+}
+
+func RandomNumbersInRange(max int) int {
+	maximum := big.NewInt(int64(max))
+	randomNumber, _ := rand.Int(rand.Reader, maximum)
+	numInt := int(randomNumber.Int64())
+	return numInt
 }
