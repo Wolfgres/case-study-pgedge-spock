@@ -48,7 +48,7 @@ In this case we user is **spock**, if you use other set it.
 We need validate that we have binaries like **tar** because maybe raise a error when  we start installation. For any missing execute  this command: 
 
 ```
-sudo dnf install tar vim python3.9-pip 
+sudo dnf install tar
 
 ```
 
@@ -100,7 +100,7 @@ vim cluster/wfg_cluster/wfg_cluster.json
 and after that we validate the json file with this command: 
 
 ```
-./pgedge cluster json-template wfg_cluster
+./pgedge cluster json-validate wfg_cluster
 ```
 
 if all going well we can init the cluster with this command: 
