@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"financial_app/internal/models"
 	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -9,18 +10,33 @@ import (
 	"github.com/spf13/viper"
 )
 
-func getConnectionString() string {
-	return fmt.Sprintf(
-		"postgresql://%s:%s@%s:%v/%s",
-		viper.Get("database.node_1.admin_user"),
-		viper.Get("database.node_1.admin_pass"),
-		viper.Get("database.node_1.host"),
-		viper.GetInt("database.node_1.port"),
-		viper.Get("database.node_1.database_name"))
+func GetConnectionBodies() []models.Connection {
+	nodes := viper.GetStringMap("database")
+	var connections []models.Connection
+	for index, _ := range nodes {
+		var connection models.Connection
+		idx := "database." + parseAnyToString(index)
+		connection.User = viper.GetString(idx + ".admin_user")
+		connection.Password = viper.GetString(idx + ".admin_pass")
+		connection.Host = viper.GetString(idx + ".host")
+		connection.Port = viper.GetInt(idx + ".port")
+		connection.DBName = viper.GetString(idx + ".database_name")
+		connections = append(connections, connection)
+	}
+	return connections
 }
 
-func pgxPoolConnection(maxConns int32) (*pgxpool.Pool, error) {
-	var connStr string = getConnectionString()
+func GetConnectionString(connection models.Connection) string {
+	return fmt.Sprintf(
+		"postgresql://%s:%s@%s:%v/%s",
+		connection.User,
+		connection.Password,
+		connection.Host,
+		connection.Port,
+		connection.DBName)
+}
+
+func pgxPoolConnection(maxConns int32, connStr string) (*pgxpool.Pool, error) {
 	ctx := context.Background()
 	// Configurar el pool con opciones adicionales
 	config, err := pgxpool.ParseConfig(connStr)
@@ -43,7 +59,7 @@ func pgxPoolConnection(maxConns int32) (*pgxpool.Pool, error) {
 	return pool, nil
 }
 
-func InitDatabasePool(maxConns int, numGoroutines int) *pgxpool.Pool {
+func InitDatabasePool(maxConns int, numGoroutines int, connStr string) *pgxpool.Pool {
 	if maxConns <= 0 {
 		logrus.Fatal("Please, enter a valid number for max-conns")
 	}
@@ -51,9 +67,18 @@ func InitDatabasePool(maxConns int, numGoroutines int) *pgxpool.Pool {
 		logrus.Fatal("max-conns must be >= goroutines")
 	}
 	maxConnsInt32 := int32(maxConns)
-	pool, err := pgxPoolConnection(maxConnsInt32)
+	pool, err := pgxPoolConnection(maxConnsInt32, connStr)
 	if err != nil {
 		logrus.Fatal("No se pudo conectar a la base de datos:", err)
 	}
 	return pool
+}
+
+func parseAnyToString(value any) string {
+	// Convertir usando type assertion
+	str, ok := value.(string)
+	if !ok {
+		logrus.Fatal("Value isn't a string")
+	}
+	return str
 }

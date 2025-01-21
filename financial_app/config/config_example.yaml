@@ -11,3 +11,9 @@ database:
     admin_user: postgres
     admin_pass: postgres
     database_name: wolfgres_db
+  node_2:
+    host: localhost
+    port: 5433
+    admin_user: postgres
+    admin_pass: postgres
+    database_name: wolfgres_db

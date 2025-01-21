@@ -1,6 +1,7 @@
 package services
 
 import (
+	"financial_app/internal/database"
 	"sync"
 	"time"
 
@@ -8,24 +9,33 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var idCounter int64 = 0
-var idMutex sync.Mutex
+var (
+	nodesCounter []int64
+	idMutex      sync.Mutex
+	nodes        int
+)
 
 // Función para generar IDs incrementales de manera concurrente
-func getCounter() {
+func getCounter(node int) {
 	idMutex.Lock()
 	defer idMutex.Unlock()
-	idCounter++
+	nodesCounter[node]++
 }
 
-func getCounterInserts(option int) {
+func getCounterResult(option int) {
+	for i, value := range nodesCounter {
+		getCounterActions(option, int(value), i+1)
+	}
+}
+
+func getCounterActions(option int, counted int, node int) {
 	switch option {
 	case 1:
-		logrus.Infof("Number of INSERTS per table %v", idCounter)
+		logrus.Infof("Number of INSERTS per table %v in Node %v", counted, node)
 	case 2:
-		logrus.Infof("Number oF SELECTS per table %v", idCounter)
+		logrus.Infof("Number of SELECTS per table %v in Node %v", counted, node)
 	case 3:
-		logrus.Infof("Number of UPDATE per table %v", idCounter)
+		logrus.Infof("Number of UPDATE per table %v in Node %v", counted, node)
 	default:
 		logrus.Fatal("Invalid option. Check the options.")
 	}
@@ -63,29 +73,36 @@ func captureStressTestEnd(start time.Time) {
 	logrus.Infof("Waiting for goroutines to finish...")
 }
 
-func stressTestPerTransactions(pool *pgxpool.Pool, numGoroutines int, numTransactions int, option int) {
+func stressTestPerTransactions(pools []*pgxpool.Pool, numGoroutines int, numTransactions int, option int) {
 	var wg sync.WaitGroup
-	initCounterInserts(pool, option)
+	initCounterInserts(pools[0], option)
 	start := time.Now()
+	nodes = len(pools)
+	nodesCounter = make([]int64, nodes)
 	for i := 0; i < numGoroutines; i++ {
 		wg.Add(1)
 		go func(workerID int) {
 			defer wg.Done()
 			for j := 0; j < numTransactions/numGoroutines; j++ {
-				operation(pool, option)
+				node := RandomNumbersInRange(nodes)
+				operation(pools[node], option)
+				getCounter(node)
 			}
 		}(i)
 	}
 	captureStressTestEnd(start)
 	wg.Wait()
+	getCounterResult(option)
 }
 
-func stressTest(pool *pgxpool.Pool, numGoroutines int, secondDuration int, option int) {
+func stressTest(pools []*pgxpool.Pool, numGoroutines int, secondDuration int, option int) {
 	var wg sync.WaitGroup
 	secondLong := time.Duration(secondDuration) * time.Second
 	stopChan := make(chan struct{}) // Canal para detener las goroutines
-	initCounterInserts(pool, option)
+	initCounterInserts(pools[0], option)
 	start := time.Now()
+	nodes = len(pools)
+	nodesCounter = make([]int64, nodes)
 	for i := 0; i < numGoroutines; i++ {
 		wg.Add(1)
 		go func(workerID int) {
@@ -95,8 +112,9 @@ func stressTest(pool *pgxpool.Pool, numGoroutines int, secondDuration int, optio
 				case <-stopChan:
 					return
 				default:
-					operation(pool, option)
-					getCounter()
+					node := RandomNumbersInRange(nodes)
+					operation(pools[node], option)
+					getCounter(node)
 				}
 			}
 		}(i)
@@ -108,10 +126,10 @@ func stressTest(pool *pgxpool.Pool, numGoroutines int, secondDuration int, optio
 	close(stopChan)
 	captureStressTestEnd(start)
 	wg.Wait()
-	getCounterInserts(option)
+	getCounterResult(option)
 }
 
-func StartStressTest(pool *pgxpool.Pool, numGoroutines int, duration int, numTransactions int, option int) {
+func startStressTest(pools []*pgxpool.Pool, numGoroutines int, duration int, numTransactions int, option int) {
 	if numGoroutines <= 0 {
 		logrus.Fatal("The number of goroutines is not valid.")
 	}
@@ -121,16 +139,27 @@ func StartStressTest(pool *pgxpool.Pool, numGoroutines int, duration int, numTra
 	if duration > 0 && numTransactions > 0 {
 		logrus.Fatal("Only one parameter (duration or transaction) must be > 0.")
 	}
-	defer pool.Close() // Asegura que el pool se cierre correctamente
 	if duration > 0 && numTransactions == 0 {
 		logrus.Info("Running stress test for seconds duration...")
-		stressTest(pool, numGoroutines, duration, option)
+		stressTest(pools, numGoroutines, duration, option)
 	}
 	if numTransactions%numGoroutines != 0 {
 		logrus.Fatal("Please enter only numbers (goroutines and transactions) that are multiples.")
 	}
 	if numTransactions > 0 && duration == 0 {
 		logrus.Info("Running stress test by number of transactions...")
-		stressTestPerTransactions(pool, numGoroutines, numTransactions, option)
+		stressTestPerTransactions(pools, numGoroutines, numTransactions, option)
 	}
+}
+
+func StressTestNodes(numGoroutines int, duration int, numTransactions int, option int, maxConns int) {
+	connStrNodes := database.GetConnectionBodies()
+	//numNodes := len(connStrNodes)
+	var pools []*pgxpool.Pool
+	for _, value := range connStrNodes {
+		connStr := database.GetConnectionString(value)
+		pool := database.InitDatabasePool(maxConns, numGoroutines, connStr)
+		pools = append(pools, pool)
+	}
+	startStressTest(pools, numGoroutines, duration, numTransactions, option)
 }

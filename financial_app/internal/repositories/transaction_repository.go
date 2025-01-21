@@ -29,7 +29,7 @@ func InsertTransactionObjectPool(pool *pgxpool.Pool, mTransaction models.Transac
 		mTransaction.Date,
 	)
 	if err != nil {
-		logrus.Fatalf("Error al ejecutar el INSERT en transacción %v", err)
+		logrus.Fatalf("Error executing INSERT in transaction %v", err)
 	}
 }
 
@@ -96,6 +96,6 @@ func UpdateTransactionObject(pool *pgxpool.Pool, mTransaction models.Transaction
 		mTransaction.TransactionID,
 	)
 	if err != nil {
-		logrus.Fatalf("Error al ejecutar el UPDATE en transacción: %v", err)
+		logrus.Fatalf("Error executing UPDATE in transaction: %v", err)
 	}
 }

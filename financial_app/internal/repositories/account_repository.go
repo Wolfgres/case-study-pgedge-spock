@@ -19,7 +19,7 @@ func InsertAccountObjectPool(pool *pgxpool.Pool, mAccount models.Account) error 
 		mAccount.Balace,
 	)
 	if err != nil {
-		logrus.Fatalf("Error al ejecutar el INSERT en account: %v", err)
+		logrus.Fatalf("Error executing INSERT on account: %v", err)
 		return err
 	}
 	return nil
@@ -95,6 +95,6 @@ func UpdateAccountObject(pool *pgxpool.Pool, mAccount models.Account) {
 		mAccount.AccountID,
 	)
 	if err != nil {
-		logrus.Fatalf("Error al ejecutar el UPDATE en account: %v", err)
+		logrus.Fatalf("Error executing UPDATE on account: %v", err)
 	}
 }

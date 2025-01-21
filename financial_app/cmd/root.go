@@ -4,7 +4,6 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"financial_app/internal/database"
 	"financial_app/internal/services"
 	"fmt"
 	"io"
@@ -73,8 +72,7 @@ func start() {
 	logrus.Infof("Max Connections in Pool: %d", maxConns)
 	logrus.Infof("Transacions per table: %d", numTransactions)
 	logrus.Info("************************************************")
-	pool := database.InitDatabasePool(maxConns, numGoroutines)
-	services.StartStressTest(pool, numGoroutines, testDuration, numTransactions, operation)
+	services.StressTestNodes(numGoroutines, testDuration, numTransactions, operation, maxConns)
 }
 
 func getConfigFilePath() string {
