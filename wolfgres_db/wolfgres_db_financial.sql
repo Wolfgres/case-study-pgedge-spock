@@ -1,6 +1,9 @@
 -- Create Schema
 
+CREATE SCHEMA wfg;
+
 ALTER SCHEMA wfg OWNER TO wolfgres_user;
+
 
 CREATE TABLE wfg.account (
     account_id integer NOT NULL,
@@ -26,6 +29,32 @@ ALTER SEQUENCE wfg.account_account_id_seq OWNER TO wolfgres_user;
 
 
 ALTER SEQUENCE wfg.account_account_id_seq OWNED BY wfg.account.account_id;
+
+
+
+CREATE TABLE wfg.account_type (
+    account_type_id integer NOT NULL,
+    name character varying(50),
+    description text
+);
+
+
+ALTER TABLE wfg.account_type OWNER TO wolfgres_user;
+
+
+CREATE SEQUENCE wfg.account_type_account_type_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE wfg.account_type_account_type_id_seq OWNER TO wolfgres_user;
+
+
+ALTER SEQUENCE wfg.account_type_account_type_id_seq OWNED BY wfg.account_type.account_type_id;
 
 
 
@@ -90,11 +119,16 @@ CREATE SEQUENCE wfg.transaction_transaction_id_seq
 
 ALTER SEQUENCE wfg.transaction_transaction_id_seq OWNER TO wolfgres_user;
 
+
 ALTER SEQUENCE wfg.transaction_transaction_id_seq OWNED BY wfg.transaction.transaction_id;
 
 
 
 ALTER TABLE ONLY wfg.account ALTER COLUMN account_id SET DEFAULT nextval('wfg.account_account_id_seq'::regclass);
+
+
+
+ALTER TABLE ONLY wfg.account_type ALTER COLUMN account_type_id SET DEFAULT nextval('wfg.account_type_account_type_id_seq'::regclass);
 
 
 
@@ -107,6 +141,14 @@ ALTER TABLE ONLY wfg.transaction ALTER COLUMN transaction_id SET DEFAULT nextval
 
 
 COPY wfg.account (account_id, customer_id, account_type_id, balace) FROM stdin;
+\.
+
+
+
+COPY wfg.account_type (account_type_id, name, description) FROM stdin;
+1	Cuenta Básica	Permiten realizar transferencias, domiciliar servicios y consultar movimientos bancarios. La mayoría de las cuentas corrientes vienen con una tarjeta de débito.
+2	Cuenta de Ahorro	Son ideales para ahorrar de manera segura y accesible. Su objetivo es hacer crecer el dinero en el largo plazo.
+3	Cuenta de Nómina	Son cuentas corrientes en las que se recibe el salario. A veces ofrecen ventajas adicionales o descuentos por usarlas para hacer pagos.
 \.
 
 
@@ -622,12 +664,18 @@ COPY wfg.operation (operation_id, name, description) FROM stdin;
 3	Transferencia	Consiste en mover dinero de una cuenta a otra
 \.
 
+
+
 COPY wfg.transaction (transaction_id, account_id, operation_id, mount, date) FROM stdin;
 \.
 
 
 
 SELECT pg_catalog.setval('wfg.account_account_id_seq', 1, false);
+
+
+
+SELECT pg_catalog.setval('wfg.account_type_account_type_id_seq', 1, false);
 
 
 
@@ -641,6 +689,11 @@ SELECT pg_catalog.setval('wfg.transaction_transaction_id_seq', 1, false);
 
 ALTER TABLE ONLY wfg.account
     ADD CONSTRAINT account_pkey PRIMARY KEY (account_id);
+
+
+
+ALTER TABLE ONLY wfg.account_type
+    ADD CONSTRAINT account_type_pkey PRIMARY KEY (account_type_id);
 
 
 
@@ -676,4 +729,6 @@ ALTER TABLE ONLY wfg.account
 
 ALTER TABLE ONLY wfg.transaction
     ADD CONSTRAINT fk_operation FOREIGN KEY (operation_id) REFERENCES wfg.operation(operation_id);
+
+
 
