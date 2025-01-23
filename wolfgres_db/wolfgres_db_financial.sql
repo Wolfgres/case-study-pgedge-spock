@@ -1,14 +1,15 @@
--- Create Schema
+--
+-- PostgreSQL database dump
+--
 
 CREATE SCHEMA wfg;
 
 ALTER SCHEMA wfg OWNER TO wolfgres_user;
 
-
 CREATE TABLE wfg.account (
-    account_id integer NOT NULL,
-    customer_id integer,
-    account_type_id integer,
+    account_id bigint NOT NULL,
+    customer_id bigint,
+    account_type_id bigint,
     balace double precision
 );
 
@@ -17,7 +18,6 @@ ALTER TABLE wfg.account OWNER TO wolfgres_user;
 
 
 CREATE SEQUENCE wfg.account_account_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -33,7 +33,7 @@ ALTER SEQUENCE wfg.account_account_id_seq OWNED BY wfg.account.account_id;
 
 
 CREATE TABLE wfg.account_type (
-    account_type_id integer NOT NULL,
+    account_type_id bigint NOT NULL,
     name character varying(50),
     description text
 );
@@ -43,7 +43,6 @@ ALTER TABLE wfg.account_type OWNER TO wolfgres_user;
 
 
 CREATE SEQUENCE wfg.account_type_account_type_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -71,7 +70,7 @@ ALTER TABLE wfg.customer OWNER TO wolfgres_user;
 
 
 CREATE TABLE wfg.operation (
-    operation_id integer NOT NULL,
+    operation_id bigint NOT NULL,
     name character varying(50),
     description text
 );
@@ -81,7 +80,6 @@ ALTER TABLE wfg.operation OWNER TO wolfgres_user;
 
 
 CREATE SEQUENCE wfg.operation_operation_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -97,9 +95,9 @@ ALTER SEQUENCE wfg.operation_operation_id_seq OWNED BY wfg.operation.operation_i
 
 
 CREATE TABLE wfg.transaction (
-    transaction_id integer NOT NULL,
-    account_id integer,
-    operation_id integer,
+    transaction_id bigint NOT NULL,
+    account_id bigint,
+    operation_id bigint,
     mount double precision,
     date timestamp without time zone
 );
@@ -109,7 +107,6 @@ ALTER TABLE wfg.transaction OWNER TO wolfgres_user;
 
 
 CREATE SEQUENCE wfg.transaction_transaction_id_seq
-    AS integer
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -146,9 +143,6 @@ COPY wfg.account (account_id, customer_id, account_type_id, balace) FROM stdin;
 
 
 COPY wfg.account_type (account_type_id, name, description) FROM stdin;
-1	Cuenta Básica	Permiten realizar transferencias, domiciliar servicios y consultar movimientos bancarios. La mayoría de las cuentas corrientes vienen con una tarjeta de débito.
-2	Cuenta de Ahorro	Son ideales para ahorrar de manera segura y accesible. Su objetivo es hacer crecer el dinero en el largo plazo.
-3	Cuenta de Nómina	Son cuentas corrientes en las que se recibe el salario. A veces ofrecen ventajas adicionales o descuentos por usarlas para hacer pagos.
 \.
 
 
@@ -659,9 +653,6 @@ COPY wfg.customer (customer_id, name, address, website, credit_limit) FROM stdin
 
 
 COPY wfg.operation (operation_id, name, description) FROM stdin;
-1	Deposito	Consiste en agregar dinero a la cuenta
-2	Retiro	Consiste en sustraer dinero a la cuenta
-3	Transferencia	Consiste en mover dinero de una cuenta a otra
 \.
 
 
@@ -731,4 +722,8 @@ ALTER TABLE ONLY wfg.transaction
     ADD CONSTRAINT fk_operation FOREIGN KEY (operation_id) REFERENCES wfg.operation(operation_id);
 
 
+
+--
+-- PostgreSQL database dump complete
+--
 
