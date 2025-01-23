@@ -84,7 +84,6 @@ func execTransaction(pools []*pgxpool.Pool, transactionDuration time.Duration, o
 func stressTestPerTransactions(pools []*pgxpool.Pool, numGoroutines int, numTransactions int, option int, transactionDuration time.Duration) {
 	var wg sync.WaitGroup
 	start := time.Now()
-	nodesCounter = make([]int64, nodes)
 	for i := 0; i < numGoroutines; i++ {
 		wg.Add(1)
 		go func(workerID int) {
@@ -103,7 +102,6 @@ func stressTest(pools []*pgxpool.Pool, numGoroutines int, secondDuration int, op
 	secondLong := time.Duration(secondDuration) * time.Second
 	stopChan := make(chan struct{}) // Canal para detener las goroutines
 	start := time.Now()
-	nodesCounter = make([]int64, nodes)
 	for i := 0; i < numGoroutines; i++ {
 		wg.Add(1)
 		go func(workerID int) {
@@ -159,6 +157,7 @@ func StressTestNodes(numGoroutines int, duration int, numTransactions int, optio
 	initCounterInserts(pools[firstNode], option, firstNode)
 	transactionDuration := time.Duration(milisecondValue) * time.Millisecond
 	nodes = len(pools)
+	nodesCounter = make([]int64, nodes)
 	startStressTest(pools, numGoroutines, duration, numTransactions, option, transactionDuration)
 	getCounterResult(option)
 }
