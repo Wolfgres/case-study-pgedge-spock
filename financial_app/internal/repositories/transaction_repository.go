@@ -11,7 +11,7 @@ import (
 /*
 TODO: don't use this method to create PK, instead that use sequence
 */
-func GetLastTransactionIDObject(pool *pgxpool.Pool) int {
+func GetLastTransactionIDObject(pool *pgxpool.Pool) int64 {
 	query := "SELECT COALESCE(MAX(transaction_id), 0) FROM wfg.transaction"
 	return GetLastID(pool, query)
 }
@@ -29,7 +29,7 @@ func InsertTransactionObjectPool(pool *pgxpool.Pool, mTransaction models.Transac
 		mTransaction.Date,
 	)
 	if err != nil {
-		logrus.Fatalf("Error executing INSERT in transaction %v", err)
+		logrus.Fatalf("Error executing INSERT in transaction: %v", err)
 	}
 }
 
@@ -68,7 +68,7 @@ func GetTransactionObjects(pool *pgxpool.Pool) ([]models.Transaction, error) {
 	return transactions, nil
 }
 
-func GetTransactionObject(pool *pgxpool.Pool, transactionID int) (*models.Transaction, error) {
+func GetTransactionObject(pool *pgxpool.Pool, transactionID int64) (*models.Transaction, error) {
 	var transaction models.Transaction
 	query := "SELECT t.transaction_id, t.account_id, t.operation_id, t.mount, t.date FROM wfg.transaction AS t WHERE t.transaction_id = $1"
 	err := pool.QueryRow(context.Background(), query, transactionID).Scan(

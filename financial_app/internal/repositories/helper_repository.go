@@ -7,8 +7,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func GetLastID(pool *pgxpool.Pool, query string) int {
-	var lastID int
+func GetLastID(pool *pgxpool.Pool, query string) int64 {
+	var lastID int64
 	err := pool.QueryRow(context.Background(), query).Scan(&lastID)
 	if err != nil {
 		logrus.Fatalf("Error getting last ID: %v", err)

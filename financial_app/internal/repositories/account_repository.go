@@ -25,7 +25,7 @@ func InsertAccountObjectPool(pool *pgxpool.Pool, mAccount models.Account) error 
 	return nil
 }
 
-func GetLastAccountIDObject(pool *pgxpool.Pool) int {
+func GetLastAccountIDObject(pool *pgxpool.Pool) int64 {
 	query := "SELECT COALESCE(MAX(account_id), 0) FROM wfg.account"
 	return GetLastID(pool, query)
 }
@@ -65,12 +65,12 @@ func GetAccountObjects(pool *pgxpool.Pool) ([]models.Account, error) {
 	return accounts, nil
 }
 
-func GetLastAccountID(pool *pgxpool.Pool) int {
+func GetLastAccountID(pool *pgxpool.Pool) int64 {
 	query := "SELECT COALESCE(MAX(account_id), 0) FROM wfg.account"
 	return GetLastID(pool, query)
 }
 
-func GetAccountObject(pool *pgxpool.Pool, accountID int) (*models.Account, error) {
+func GetAccountObject(pool *pgxpool.Pool, accountID int64) (*models.Account, error) {
 	var account models.Account
 	query := "SELECT a.account_id, a.customer_id, a.account_type_id, a.balace FROM wfg.account AS a WHERE a.account_id = $1"
 	err := pool.QueryRow(context.Background(), query, accountID).Scan(

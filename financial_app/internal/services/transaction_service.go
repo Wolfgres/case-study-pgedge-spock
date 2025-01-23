@@ -9,14 +9,14 @@ import (
 )
 
 var (
-	idCounterTransaction int // Contador global de IDs
+	idCounterTransaction int64 // Contador global de IDs
 )
 
 func validateTransactionId(pool *pgxpool.Pool) {
 	idCounterTransaction = repositories.GetLastTransactionIDObject(pool)
 }
 
-func createTransactionObject(pool *pgxpool.Pool) {
+func createTransactionObject(pool *pgxpool.Pool, node int) {
 	now := time.Now().UTC()
 	transaction := models.Transaction{
 		AccountID:   idCounterAccount,
@@ -25,15 +25,18 @@ func createTransactionObject(pool *pgxpool.Pool) {
 		Date:        now,
 	}
 	repositories.InsertTransactionObjectPool(pool, transaction)
+	getCounter(node)
 }
 
-func getTransactionObjectPage(pool *pgxpool.Pool) {
+func getTransactionObjectPage(pool *pgxpool.Pool, node int) {
 	repositories.GetTransactionObjects(pool)
+	getCounter(node)
 }
 
-func editTransactionOnject(pool *pgxpool.Pool) {
+func editTransactionOnject(pool *pgxpool.Pool, node int) {
 	transaction, _ := repositories.GetTransactionObject(pool, idCounterTransaction)
 	transaction.Mount = 2300.0
 	transaction.Date = time.Now()
 	repositories.UpdateTransactionObject(pool, *transaction)
+	getCounter(node)
 }

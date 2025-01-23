@@ -121,16 +121,16 @@ type OrderItems struct {
 }
 
 type Transaction struct {
-	TransactionID int       `json:"transaction_id"`
-	AccountID     int       `json:"account_id"`
+	TransactionID int64     `json:"transaction_id"`
+	AccountID     int64     `json:"account_id"`
 	OperationID   int       `json:"operation_id"`
 	Mount         float64   `json:"mount"`
 	Date          time.Time `json:"date"`
 }
 
 type Account struct {
-	AccountID     int     `json:"account_id"`
-	CustomerID    int     `json:"customer_id"`
+	AccountID     int64   `json:"account_id"`
+	CustomerID    int64   `json:"customer_id"`
 	AccountTypeID int     `json:"account_type_id"`
 	Balace        float64 `json:"balace"`
 }

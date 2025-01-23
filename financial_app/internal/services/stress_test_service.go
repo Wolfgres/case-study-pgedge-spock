@@ -15,6 +15,8 @@ var (
 	nodes        int
 )
 
+const firstNode = 0
+
 // Función para generar IDs incrementales de manera concurrente
 func getCounter(node int) {
 	idMutex.Lock()
@@ -41,27 +43,27 @@ func getCounterActions(option int, counted int, node int) {
 	}
 }
 
-func initCounterInserts(pool *pgxpool.Pool, option int) {
+func initCounterInserts(pool *pgxpool.Pool, option int, node int) {
 	if option == 1 || option == 3 {
-		getAccountIdPivot(pool)     // Se crea un bjeto account como pivote para transaction.
-		validateTransactionId(pool) // Se obtinene el Id inicial
+		getAccountIdPivot(pool, node) // Se crea un bjeto account como pivote para transaction.
+		validateTransactionId(pool)   // Se obtinene el Id inicial
 	}
 	if option == 3 && idCounterTransaction == 0 {
 		logrus.Fatal("There is no complete data available to UPDATE.")
 	}
 }
 
-func operation(pool *pgxpool.Pool, option int) {
+func operation(pool *pgxpool.Pool, option int, node int) {
 	switch option {
 	case 1:
-		createAccountObject(pool)
-		createTransactionObject(pool)
+		createAccountObject(pool, node)
+		createTransactionObject(pool, node)
 	case 2:
-		getAccountObjectPage(pool)
-		getTransactionObjectPage(pool)
+		getAccountObjectPage(pool, node)
+		getTransactionObjectPage(pool, node)
 	case 3:
-		editAccountObject(pool)
-		editTransactionOnject(pool)
+		editAccountObject(pool, node)
+		editTransactionOnject(pool, node)
 	default:
 		logrus.Fatal("Invalid operation. Check the options.")
 	}
@@ -75,7 +77,7 @@ func captureStressTestEnd(start time.Time) {
 
 func stressTestPerTransactions(pools []*pgxpool.Pool, numGoroutines int, numTransactions int, option int) {
 	var wg sync.WaitGroup
-	initCounterInserts(pools[0], option)
+	initCounterInserts(pools[firstNode], option, firstNode)
 	start := time.Now()
 	nodes = len(pools)
 	nodesCounter = make([]int64, nodes)
@@ -85,8 +87,7 @@ func stressTestPerTransactions(pools []*pgxpool.Pool, numGoroutines int, numTran
 			defer wg.Done()
 			for j := 0; j < numTransactions/numGoroutines; j++ {
 				node := RandomNumbersInRange(nodes)
-				operation(pools[node], option)
-				getCounter(node)
+				operation(pools[node], option, node)
 			}
 		}(i)
 	}
@@ -99,7 +100,7 @@ func stressTest(pools []*pgxpool.Pool, numGoroutines int, secondDuration int, op
 	var wg sync.WaitGroup
 	secondLong := time.Duration(secondDuration) * time.Second
 	stopChan := make(chan struct{}) // Canal para detener las goroutines
-	initCounterInserts(pools[0], option)
+	initCounterInserts(pools[firstNode], option, firstNode)
 	start := time.Now()
 	nodes = len(pools)
 	nodesCounter = make([]int64, nodes)
@@ -113,8 +114,7 @@ func stressTest(pools []*pgxpool.Pool, numGoroutines int, secondDuration int, op
 					return
 				default:
 					node := RandomNumbersInRange(nodes)
-					operation(pools[node], option)
-					getCounter(node)
+					operation(pools[node], option, node)
 				}
 			}
 		}(i)
