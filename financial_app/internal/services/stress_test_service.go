@@ -75,34 +75,34 @@ func captureStressTestEnd(start time.Time) {
 	logrus.Infof("Waiting for goroutines to finish...")
 }
 
-func stressTestPerTransactions(pools []*pgxpool.Pool, numGoroutines int, numTransactions int, option int) {
+func execTransaction(pools []*pgxpool.Pool, transactionDuration time.Duration, option int) {
+	node := RandomNumbersInRange(nodes)
+	operation(pools[node], option, node)
+	time.Sleep(transactionDuration)
+}
+
+func stressTestPerTransactions(pools []*pgxpool.Pool, numGoroutines int, numTransactions int, option int, transactionDuration time.Duration) {
 	var wg sync.WaitGroup
-	initCounterInserts(pools[firstNode], option, firstNode)
 	start := time.Now()
-	nodes = len(pools)
 	nodesCounter = make([]int64, nodes)
 	for i := 0; i < numGoroutines; i++ {
 		wg.Add(1)
 		go func(workerID int) {
 			defer wg.Done()
 			for j := 0; j < numTransactions/numGoroutines; j++ {
-				node := RandomNumbersInRange(nodes)
-				operation(pools[node], option, node)
+				execTransaction(pools, transactionDuration, option)
 			}
 		}(i)
 	}
 	captureStressTestEnd(start)
 	wg.Wait()
-	getCounterResult(option)
 }
 
-func stressTest(pools []*pgxpool.Pool, numGoroutines int, secondDuration int, option int) {
+func stressTest(pools []*pgxpool.Pool, numGoroutines int, secondDuration int, option int, transactionDuration time.Duration) {
 	var wg sync.WaitGroup
 	secondLong := time.Duration(secondDuration) * time.Second
 	stopChan := make(chan struct{}) // Canal para detener las goroutines
-	initCounterInserts(pools[firstNode], option, firstNode)
 	start := time.Now()
-	nodes = len(pools)
 	nodesCounter = make([]int64, nodes)
 	for i := 0; i < numGoroutines; i++ {
 		wg.Add(1)
@@ -113,23 +113,19 @@ func stressTest(pools []*pgxpool.Pool, numGoroutines int, secondDuration int, op
 				case <-stopChan:
 					return
 				default:
-					node := RandomNumbersInRange(nodes)
-					operation(pools[node], option, node)
+					execTransaction(pools, transactionDuration, option)
 				}
 			}
 		}(i)
 	}
-
 	// Esperar el tiempo especificado
 	time.Sleep(secondLong)
-	// Señal para detener las goroutines
 	close(stopChan)
 	captureStressTestEnd(start)
 	wg.Wait()
-	getCounterResult(option)
 }
 
-func startStressTest(pools []*pgxpool.Pool, numGoroutines int, duration int, numTransactions int, option int) {
+func startStressTest(pools []*pgxpool.Pool, numGoroutines int, duration int, numTransactions int, option int, transactionDuration time.Duration) {
 	if numGoroutines <= 0 {
 		logrus.Fatal("The number of goroutines is not valid.")
 	}
@@ -141,25 +137,28 @@ func startStressTest(pools []*pgxpool.Pool, numGoroutines int, duration int, num
 	}
 	if duration > 0 && numTransactions == 0 {
 		logrus.Info("Running stress test for seconds duration...")
-		stressTest(pools, numGoroutines, duration, option)
+		stressTest(pools, numGoroutines, duration, option, transactionDuration)
 	}
 	if numTransactions%numGoroutines != 0 {
 		logrus.Fatal("Please enter only numbers (goroutines and transactions) that are multiples.")
 	}
 	if numTransactions > 0 && duration == 0 {
 		logrus.Info("Running stress test by number of transactions...")
-		stressTestPerTransactions(pools, numGoroutines, numTransactions, option)
+		stressTestPerTransactions(pools, numGoroutines, numTransactions, option, transactionDuration)
 	}
 }
 
-func StressTestNodes(numGoroutines int, duration int, numTransactions int, option int, maxConns int) {
+func StressTestNodes(numGoroutines int, duration int, numTransactions int, option int, maxConns int, milisecondValue int) {
 	connStrNodes := database.GetConnectionBodies()
-	//numNodes := len(connStrNodes)
 	var pools []*pgxpool.Pool
 	for _, value := range connStrNodes {
 		connStr := database.GetConnectionString(value)
 		pool := database.InitDatabasePool(maxConns, numGoroutines, connStr)
 		pools = append(pools, pool)
 	}
-	startStressTest(pools, numGoroutines, duration, numTransactions, option)
+	initCounterInserts(pools[firstNode], option, firstNode)
+	transactionDuration := time.Duration(milisecondValue) * time.Millisecond
+	nodes = len(pools)
+	startStressTest(pools, numGoroutines, duration, numTransactions, option, transactionDuration)
+	getCounterResult(option)
 }

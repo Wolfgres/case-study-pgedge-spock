@@ -24,6 +24,7 @@ var (
 	maxConns        int
 	numTransactions int
 	operation       int
+	milisecondValue int
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -58,9 +59,10 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.Flags().IntVarP(&numGoroutines, "goroutines", "g", 0, "Number of concurrent goroutines")
 	rootCmd.Flags().IntVarP(&testDuration, "duration", "d", 0, "Test duration in seconds")
-	rootCmd.Flags().IntVarP(&maxConns, "max-conns", "m", 0, "Maximum number of connections in the pool")
+	rootCmd.Flags().IntVarP(&maxConns, "max-conns", "c", 0, "Maximum number of connections in the pool")
 	rootCmd.Flags().IntVarP(&numTransactions, "transactions", "t", 0, "Number of transactions. Must be a number that are multiples of goroutine")
 	rootCmd.Flags().IntVarP(&operation, "operation", "o", 0, "Choose a stress test transactions: INSERT=1, SELECT=2, UPDATE=3")
+	rootCmd.Flags().IntVarP(&milisecondValue, "miliseconds", "m", 0, "Milliseconds that a transaction takes to execute")
 }
 
 func start() {
@@ -71,8 +73,9 @@ func start() {
 	logrus.Infof("Test Duration: %d seconds", testDuration)
 	logrus.Infof("Max Connections in Pool: %d", maxConns)
 	logrus.Infof("Transacions per table: %d", numTransactions)
+	logrus.Infof("Milliseconds per transaction: %d", milisecondValue)
 	logrus.Info("************************************************")
-	services.StressTestNodes(numGoroutines, testDuration, numTransactions, operation, maxConns)
+	services.StressTestNodes(numGoroutines, testDuration, numTransactions, operation, maxConns, milisecondValue)
 }
 
 func getConfigFilePath() string {

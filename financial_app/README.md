@@ -48,7 +48,8 @@ go run main.go [flags]
   -d, --duration int       Test duration in seconds
   -g, --goroutines int     Number of concurrent goroutines
   -h, --help               help for financial_app
-  -m, --max-conns int      Maximum number of connections in the pool
+  -c, --max-conns int      Maximum number of connections in the pool
+  -m, --miliseconds int    Milliseconds that a transaction takes to execute
   -o, --operation int      Choose a stress test transactions: INSERT=1, SELECT=2, UPDATE=3
   -t, --transactions int   Number of transactions. Must be a number that are multiples of goroutine
 ```
