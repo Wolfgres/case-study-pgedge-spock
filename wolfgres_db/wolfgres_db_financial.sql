@@ -1,5 +1,8 @@
+\c wolfgres_db
+
 -- Schema wfg
 CREATE SCHEMA wfg;
+
 
 -- Table Customer
 CREATE TABLE wfg.customer(
@@ -30,8 +33,8 @@ CREATE TABLE wfg.account(
  customer_id BIGINT,
  account_type_id BIGINT,
  balace DOUBLE PRECISION,
- CONSTRAINT fk_customer FOREIGN KEY(customer_id) REFERENCES customer(customer_id),
- CONSTRAINT fk_account_type FOREIGN KEY(account_type_id) REFERENCES account_type(account_type_id)
+ CONSTRAINT fk_customer FOREIGN KEY(customer_id) REFERENCES wfg.customer(customer_id),
+ CONSTRAINT fk_account_type FOREIGN KEY(account_type_id) REFERENCES wfg.account_type(account_type_id)
 );
 
 -- Table Transaction
@@ -41,8 +44,8 @@ CREATE TABLE wfg.transaction(
  operation_id BIGINT,
  mount DOUBLE PRECISION,
  date TIMESTAMP,
- CONSTRAINT fk_account FOREIGN KEY(account_id) REFERENCES account(account_id),
- CONSTRAINT fk_operation FOREIGN KEY(operation_id) REFERENCES operation(operation_id)
+ CONSTRAINT fk_account FOREIGN KEY(account_id) REFERENCES wfg.account(account_id),
+ CONSTRAINT fk_operation FOREIGN KEY(operation_id) REFERENCES wfg.operation(operation_id)
 );
 
 -- INSERTS Customer
