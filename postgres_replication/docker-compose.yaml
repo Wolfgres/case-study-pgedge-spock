@@ -16,7 +16,7 @@ services:
     ports:
       - 4431:5432
     environment:
-      POSTGRES_USER: postgres
+      POSTGRES_USER: wolfgres_user
       POSTGRES_DB: postgres
       POSTGRES_PASSWORD: VB7tZ99dulum
       POSTGRES_HOST_AUTH_METHOD: "scram-sha-256\nhost replication all 0.0.0.0/0 md5"
@@ -31,7 +31,7 @@ services:
       -c hot_standby_feedback=on
     volumes:
       - ./00_init.sql:/docker-entrypoint-initdb.d/00_init.sql
-      - ../wolfgres_db/wolfgres_db.sql:/docker-entrypoint-initdb.d/wolfgres_db.sql 
+      - ../wolfgres_db/wolfgres_db_financial.sql:/docker-entrypoint-initdb.d/wolfgres_db_financial.sql 
 
   postgres_replica:
     <<: *postgres-common
