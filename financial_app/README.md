@@ -135,14 +135,13 @@ docker compose -p monitoring -f docker-compose-grafana.yml up -d
 > [!TIP]
 > Para detener la ejecución anterior debemos ejecutar `docker compose -p monitoring down`
 
-4. Una vez ejecutado, accederemos desde el navegador la dirección a [Grafana](http://localhost:3030/).
-
-![Login](resources/img/Screenshot_20250124_202855.png)
-
-5. Las credenciales que utilizaremos son:
+4. Una vez ejecutado, accederemos desde el navegador la dirección a [Grafana](http://localhost:3030/). Las credenciales que utilizaremos son:
 
 - User:     `admin`
 - Password: `admin`
+
+![Login](resources/img/Screenshot_20250124_202855.png)
+
 
 6. Despues nos pedirá que ingresemos una nueva contraseña para continuar.
 
@@ -155,18 +154,17 @@ la sección de `monitoring-prometheus-1` con el siguiente comando:
 docker network inspect monitoring_default
 ```
 
-8. Continuando con la configuración de en Grafana, nos dirijimos al menú Connection/Data sources/ y seleccionamos
+8. Continuando con la configuración de Grafana, nos dirijimos al menú Connection/Data sources/ y seleccionamos
 a Prometheus:
 
 ![Prometheus](resources/img/Screenshot_20250124_203947.png)
 
-9. En la configuración de Prometheus solo añadimos URL tomando como base la IP del paso anterior y el puerto 9090 default,
+9. En la configuración de Prometheus solo añadimos URL tomando como base la IP del paso 7 y el puerto 9090 default,
 en los ajustes de TLS solo marcamos `Skip TLS certificate validation` y guardamos la configuración con el boton inferior 'Save & Test'.
 
 ![Configuration](resources/img/Screenshot_20250124_204117.png)
 
-10. Cuando se guarde correctamente la configuración, damos clic a la opción de **Dashboards > New > Import**. En esta sección cargamos
-el archivo `9828_rev8.json` del directorio `financial_app/resources/dashboard/` y completamos el campo Name, DS_PROMETHEUS (Seleccionamos el data soruce que creamos en los pasos anteriores) e importamos.
+10. Cuando se guarde correctamente la configuración, damos clic a la opción de **Dashboards > New > Import**. En esta sección cargamos el archivo `9828_rev8.json` del directorio `financial_app/resources/dashboard/` y completamos el campo Name, DS_PROMETHEUS (Seleccionamos el data soruce que creamos en los pasos anteriores) e importamos.
 
 ![Import](resources/img/Screenshot_20250124_205323.png)
 
