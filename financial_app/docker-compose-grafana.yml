@@ -1,0 +1,36 @@
+version: "3.9"
+services:
+  grafana:
+    image: grafana/grafana-oss
+    ports:
+      - 3000:3000
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+  postgres-exporter-primary:
+    image: prometheuscommunity/postgres-exporter
+    ports:
+      - 9187:9187
+    environment:
+      DATA_SOURCE_URI: "192.168.1.94:4431/wolfgres_db?sslmode=disable"
+      DATA_SOURCE_USER: wolfgres_user
+      DATA_SOURCE_PASS: VB7tZ99dulum
+    links:
+      - prometheus
+
+  postgres-exporter-secondary:
+    image: prometheuscommunity/postgres-exporter
+    ports:
+      - 9188:9187
+    environment:
+      DATA_SOURCE_URI: "192.168.1.94:4432/wolfgres_db?sslmode=disable"
+      DATA_SOURCE_USER: wolfgres_user
+      DATA_SOURCE_PASS: VB7tZ99dulum
+    links:
+      - prometheus
+
